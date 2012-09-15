@@ -9,11 +9,11 @@ type Rule = [RulePattern]
 
 rp1 = TwoDim ('X','X','X') '_'
 rp2 = TwoDim ('X','X','_') '_'
-rp3 = TwoDim ('X','_','X') 'X'
+rp3 = TwoDim ('X','_','X') '_'
 rp4 = TwoDim ('X','_','_') 'X'
 rp5 = TwoDim ('_','X','X') 'X'
 rp6 = TwoDim ('_','X','_') 'X'
-rp7 = TwoDim ('_','_','X') '_'
+rp7 = TwoDim ('_','_','X') 'X'
 rp8 = TwoDim ('_','_','_') '_'
 rule = [rp1,rp2,rp3,rp4,rp5,rp6,rp7,rp8] :: Rule
 
@@ -21,7 +21,7 @@ main =  do
     print gen
     kickstart rule gen next
     where 
-        gen = ['_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','X','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_']
+        gen = ['_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','X','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_']
         next = []
 
 kickstart :: Rule -> Generation -> Generation -> IO ()
@@ -46,7 +46,7 @@ getVal' (TwoDim x y) z | matches x z = y
 -- take a rule set, initial generation and return convoluted generation
 generation :: Rule -> Generation -> Generation -> Generation 
 generation rule origGen nextGen 
-    | length origGen == length nextGen = nextGen
+    | length origGen == length nextGen = init $ ['_'] ++ nextGen
     | otherwise                        = generation rule ( shiftL origGen )  (nextGen ++ [getVal rule $ take 3 origGen] )
 
 -- go :: Rule -> Generation -> [Generation]
