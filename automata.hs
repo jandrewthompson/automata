@@ -19,15 +19,15 @@ rule = [rp1,rp2,rp3,rp4,rp5,rp6,rp7,rp8] :: Rule
 
 main =  do
     print gen
-    dd rule gen next
+    kickstart rule gen next
     where 
         gen = ['_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','X','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_']
         next = []
 
-dd :: Rule -> Generation -> Generation -> IO ()
-dd rule gen next = do
+kickstart :: Rule -> Generation -> Generation -> IO ()
+kickstart rule gen next = do
         print $ generation rule gen next
-        dd rule ( generation rule gen next ) [] 
+        kickstart rule ( generation rule gen next ) [] 
        
 
 
