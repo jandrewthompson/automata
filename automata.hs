@@ -18,6 +18,7 @@ rp8 = TwoDim (0,0,0) 0
 rule = [rp1,rp2,rp3,rp4,rp5,rp6,rp7,rp8] :: Rule
 
 main =  do
+    print gen
     dd rule gen next
     where 
         gen = [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0]
