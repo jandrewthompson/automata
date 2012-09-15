@@ -1,27 +1,27 @@
 import Control.Monad
 
-type Generation = [Int]
+type Generation = [Char]
 
-data RulePattern = TwoDim (Int,Int,Int) Int
+data RulePattern = TwoDim (Char,Char,Char) Char
   deriving (Show, Eq)
 
 type Rule = [RulePattern]
 
-rp1 = TwoDim (1,1,1) 0
-rp2 = TwoDim (1,1,0) 0
-rp3 = TwoDim (1,0,1) 1
-rp4 = TwoDim (1,0,0) 1
-rp5 = TwoDim (0,1,1) 1
-rp6 = TwoDim (0,1,0) 1
-rp7 = TwoDim (0,0,1) 0
-rp8 = TwoDim (0,0,0) 0
+rp1 = TwoDim ('X','X','X') '_'
+rp2 = TwoDim ('X','X','_') '_'
+rp3 = TwoDim ('X','_','X') 'X'
+rp4 = TwoDim ('X','_','_') 'X'
+rp5 = TwoDim ('_','X','X') 'X'
+rp6 = TwoDim ('_','X','_') 'X'
+rp7 = TwoDim ('_','_','X') '_'
+rp8 = TwoDim ('_','_','_') '_'
 rule = [rp1,rp2,rp3,rp4,rp5,rp6,rp7,rp8] :: Rule
 
 main =  do
     print gen
     dd rule gen next
     where 
-        gen = [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0]
+        gen = ['_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','X','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_']
         next = []
 
 dd :: Rule -> Generation -> Generation -> IO ()
@@ -32,17 +32,17 @@ dd rule gen next = do
 
 
 -- given a list of rules and a sample, get the resulting output for the sample.
-getVal :: [RulePattern] -> [Int] -> Int
-getVal [] (v) = 0
+getVal :: [RulePattern] -> [Char] -> Char
+getVal [] (v) = '_'
 getVal [r] (v) = getVal' r v
 getVal (rs) (v) 
-    | getVal' (head rs) v < 0 = getVal (tail rs) v  -- rule doesn't match, recurse to next rule
+    | getVal' (head rs) v == 'E' = getVal (tail rs) v  -- rule doesn't match, recurse to next rule
     | otherwise               = getVal' (head rs) v -- rule matches, return the result
 
 -- worker for getVal.  
-getVal' :: RulePattern -> [Int] -> Int
+getVal' :: RulePattern -> [Char] -> Char
 getVal' (TwoDim x y) z | matches x z = y
-                       | otherwise   = -1
+                       | otherwise   = 'E'
 -- take a rule set, initial generation and return convoluted generation
 generation :: Rule -> Generation -> Generation -> Generation 
 generation rule origGen nextGen 
@@ -53,11 +53,11 @@ generation rule origGen nextGen
 -- go rule gen 
 --    | 
 
-shiftL :: [Int] -> [Int]
+shiftL :: [Char] -> [Char]
 shiftL [] = []
 shiftL xs = (tail xs) ++ [head xs]
 
-showRuleTpl :: RulePattern -> Int
+showRuleTpl :: RulePattern -> Char
 showRuleTpl (TwoDim x y) = y
 
 matches :: Eq a => (a,a,a) -> [a] -> Bool
