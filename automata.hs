@@ -51,7 +51,7 @@ applyPat (TwoDim x y) zs | matches x zs = Just y
 -- take a rule set, initial generation and return convoluted generation
 generation :: Rule -> Generation -> Generation -> Generation 
 generation rule origGen nextGen 
-    | length origGen == length nextGen = nextGen
+    | length origGen == length nextGen = ['_'] ++ nextGen
     | otherwise                        = generation rule ( shiftL origGen )  (nextGen ++ [applyRule rule $ take 3 origGen])
 
 -- go :: Rule -> Generation -> [Generation]
@@ -68,14 +68,6 @@ showRuleTpl (TwoDim _ y) = y
 matches :: Eq a => (a,a,a) -> [a] -> Bool
 matches (x,y,z) v = [x,y,z] == v
 
-myFst :: (x,y,z) -> x
-myFst (x,y,z) = x
-
-mySnd :: (x,y,z) -> y
-mySnd (x,y,z) = y
-
-myTrd :: (x,y,z) -> z
-myTrd (x,y,z) = z
 
 
 
