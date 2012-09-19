@@ -1,4 +1,5 @@
 import Control.Monad
+import Data.Maybe (catMaybes)
 
 type Generation = [Char]
 
@@ -21,50 +22,51 @@ main =  do
     print gen
     kickstart rule gen next
     where 
-        gen = ['_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','X','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_']
+        gen = replicate 30 '_' ++ ['X'] ++ replicate 30 '_'
         next = []
 
 kickstart :: Rule -> Generation -> Generation -> IO ()
 kickstart rule gen next = do
         print $ generation rule gen next
         kickstart rule ( generation rule gen next ) [] 
-       
 
 
--- given a list of rules and a sample, get the resulting output for the sample.
-getVal :: [RulePattern] -> [Char] -> Char
-getVal [] (v) = '_'
-getVal [r] (v) = getVal' r v
-getVal (rs) (v) 
-    | getVal' (head rs) v == 'E' = getVal (tail rs) v  -- rule doesn't match, recurse to next rule
-    | otherwise               = getVal' (head rs) v -- rule matches, return the result
+-- given a rule (list of rule patterns) and a sample, 
+-- calculate the resulting output for the sample.
+-- in this version we try to apply all of our patterns to the sample, and
+-- return the first one that matched.  thanks to laziness, this is an efficient
+-- way to do it.
+-- catMaybes :: [Maybe a] -> [a] is used to filter the list down to non-Nothing values.
+applyRule :: [RulePattern] -> [Char] -> Char
+applyRule pats samp = 
+    case catMaybes (map (`applyPat` samp) pats) of
+        []         -> '_'     -- nothing matched
+        (result:_) -> result  -- got a result
 
--- worker for getVal.  
-getVal' :: RulePattern -> [Char] -> Char
-getVal' (TwoDim x y) z | matches x z = y
-                       | otherwise   = 'E'
+-- try to apply a pattern, returning Just a result if it matches, otherwise Nothing.
+applyPat :: RulePattern -> [Char] -> Maybe Char
+applyPat (TwoDim x y) zs | matches x zs = Just y
+                         | otherwise    = Nothing
+
 -- take a rule set, initial generation and return convoluted generation
 generation :: Rule -> Generation -> Generation -> Generation 
 generation rule origGen nextGen 
-    | length origGen == length nextGen = init $ ['_'] ++ nextGen
-    | otherwise                        = generation rule ( shiftL origGen )  (nextGen ++ [getVal rule $ take 3 origGen] )
+    | length origGen == length nextGen = nextGen
+    | otherwise                        = generation rule ( shiftL origGen )  (nextGen ++ [applyRule rule $ take 3 origGen])
 
 -- go :: Rule -> Generation -> [Generation]
 -- go rule gen 
 --    | 
 
 shiftL :: [Char] -> [Char]
-shiftL [] = []
-shiftL xs = (tail xs) ++ [head xs]
+shiftL []     = []
+shiftL (x:xs) = xs ++ [x]
 
 showRuleTpl :: RulePattern -> Char
-showRuleTpl (TwoDim x y) = y
+showRuleTpl (TwoDim _ y) = y
 
 matches :: Eq a => (a,a,a) -> [a] -> Bool
-matches x (y) = ( myToList x ) == y 
-
-myToList :: (a,a,a) -> [a] 
-myToList (x,y,z) = [x,y,z]
+matches (x,y,z) v = [x,y,z] == v
 
 myFst :: (x,y,z) -> x
 myFst (x,y,z) = x
