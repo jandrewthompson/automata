@@ -1,5 +1,7 @@
 import Control.Monad
 import Data.Maybe (catMaybes)
+import System.IO
+import System.Environment
 
 type Generation = [Char]
 
@@ -18,17 +20,19 @@ rp7 = TwoDim ('_','_','X') 'X'
 rp8 = TwoDim ('_','_','_') '_'
 rule = [rp1,rp2,rp3,rp4,rp5,rp6,rp7,rp8] :: Rule
 
-main =  do
-    print gen
-    kickstart rule gen next
-    where 
-        gen = replicate 30 '_' ++ ['X'] ++ replicate 30 '_'
-        next = []
+main = do
+      (getem:_) <- getArgs
+      putStrLn $ unlines (take (read getem :: Int) (kickstart rule gen) )
+      where 
+          gen = replicate 50 '_' ++ ['X'] ++ replicate 50 '_'
 
-kickstart :: Rule -> Generation -> Generation -> IO ()
-kickstart rule gen next = do
-        print $ generation rule gen next
-        kickstart rule ( generation rule gen next ) [] 
+kickstart :: Rule -> Generation -> [Generation]
+kickstart rule gen = kickstart' rule gen [] [gen]
+
+kickstart' :: Rule -> Generation -> Generation -> [Generation] -> [Generation]
+kickstart' rule gen next results 
+                | results == []             = kickstart' rule (generation rule gen next) [] [generation rule gen next]
+                | length results == 1       = results ++ kickstart' rule (generation rule gen next) [] [] 
 
 
 -- given a rule (list of rule patterns) and a sample, 
